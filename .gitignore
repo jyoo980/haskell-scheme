@@ -1,0 +1,5 @@
+# The following types of files will be ignored in staging
+
+*.o
+*.hi
+.DS_Store
