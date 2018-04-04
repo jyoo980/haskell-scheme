@@ -1,5 +1,5 @@
 module Main where
-import Text.ParserCombinators.Parsec
+import Text.ParserCombinators.Parsec hiding (spaces)
 import System.Environment
 import Control.Monad
 
@@ -15,6 +15,24 @@ data LispVal = Atom String
 -- Define a parser which recognizes the symbols shown below
 symbol :: Parser Char
 symbol = oneOf "!#$%&|*+-/:<=>?@^_~"
+
+-- Parsing Lists
+parseList :: Parser LispVal
+parseList = liftM List $ sepBy parseExpr spaces
+
+-- Parsing dotted List notation
+parseDottedList :: Parser LispVal
+parseDottedList = do
+    head <- endBy parseExpr spaces
+    tail <- char '.' >> spaces >> parseExpr
+    return $ DottedList head tail
+
+-- Support for Lisp single-quotes
+parseQuoted :: Parser LispVal
+parseQuoted = do
+    char '\''
+    x <- parseExpr
+    return $ List[Atom "quote", x]
 
 -- Parsing strings
 parseString :: Parser LispVal
@@ -47,8 +65,15 @@ parseDouble = liftM (Fractional . read) $ many1 digit
 -- Parser which recognizes either:
 --      String, Atom, Expression
 parseExpr :: Parser LispVal
-parseExpr = parseString <|> parseAtom <|> parseNumber <|> parseDouble
-
+parseExpr = parseAtom
+         <|> parseString
+         <|> parseNumber
+         <|> parseQuoted
+         <|> do char '('
+                x <- try parseList <|> parseDottedList
+                char ')'
+                return x
+            
 -- Parser which recongizes spaces
 spaces :: Parser()
 spaces = skipMany1 space
