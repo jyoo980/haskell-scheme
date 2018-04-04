@@ -8,6 +8,7 @@ data LispVal = Atom String
     | List[LispVal]
     | DottedList [LispVal] LispVal
     | Number Integer
+    | Fractional Double
     | String String
     | Bool Bool
 
@@ -39,10 +40,14 @@ parseAtom = do
 parseNumber :: Parser LispVal
 parseNumber = liftM (Number . read) $ many1 digit
 
+-- Parsing doubles (decimal numbers)
+parseDouble :: Parser LispVal
+parseDouble = liftM (Fractional . read) $ many1 digit
+
 -- Parser which recognizes either:
 --      String, Atom, Expression
 parseExpr :: Parser LispVal
-parseExpr = parseString <|> parseAtom <|> parseNumber
+parseExpr = parseString <|> parseAtom <|> parseNumber <|> parseDouble
 
 -- Parser which recongizes spaces
 spaces :: Parser()
