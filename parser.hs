@@ -1,16 +1,8 @@
-module Main where
-import Text.ParserCombinators.Parsec hiding (spaces)
-import System.Environment
+module Parser where    
 import Control.Monad
-
--- Defining data our parser will return our parsed values as
-data LispVal = Atom String
-    | List[LispVal]
-    | DottedList [LispVal] LispVal
-    | Number Integer
-    | Fractional Double
-    | String String
-    | Bool Bool
+import Eval
+import Data
+import Text.ParserCombinators.Parsec hiding (spaces)
 
 -- Define a parser which recognizes the symbols shown below
 symbol :: Parser Char
@@ -78,12 +70,23 @@ parseExpr = parseAtom
 spaces :: Parser()
 spaces = skipMany1 space
 
+-- Showing values in our parser
+showVal :: LispVal -> String
+showVal (String contents) = "\"" ++ contents ++ "\'"
+showVal (Atom name) = name
+showVal (Number num) = show num
+showVal (Fractional frac) = show frac
+showVal (Bool True) = "#t"
+showVal (Bool False) = "#f"
+showVal (List contents) = "(" ++ unwordList contents ++ ")"
+showVal (DottedList head tail) =
+    "(" ++ unwordList head ++ "." ++ showVal tail ++ ")" 
+
+unwordList :: [LispVal] -> String
+unwordList = unwords . map showVal
+
+instance Show LispVal where show = showVal
 readExpr :: String -> String
 readExpr input = case parse parseExpr "lisp" input of
     Left err -> "No match: " ++ show err
-    Right val -> "Found value"
-
-main :: IO()
-main = do
-    (expr:_) <- getArgs
-    putStrLn(readExpr expr)
+    Right val -> "Found: " ++ show val
