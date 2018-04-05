@@ -1,6 +1,6 @@
 module Parser where    
 import Control.Monad
-import Eval
+import Evaluator
 import Data
 import Text.ParserCombinators.Parsec hiding (spaces)
 
@@ -86,7 +86,7 @@ unwordList :: [LispVal] -> String
 unwordList = unwords . map showVal
 
 instance Show LispVal where show = showVal
-readExpr :: String -> String
+readExpr :: String -> LispVal
 readExpr input = case parse parseExpr "lisp" input of
-    Left err -> "No match: " ++ show err
-    Right val -> "Found: " ++ show val
+    Left err -> String $ "No match: " ++ show err
+    Right val -> val
