@@ -40,6 +40,9 @@ primitives = [("+", numericBinop(+)),
               ("or", booleanBinop(||)),
               ("xor", booleanBinop xor)]
 
+xor :: Bool -> Bool -> Bool 
+xor a b = a /= b
+
 numericBinop :: (Integer -> Integer -> Integer) -> [LispVal] -> LispVal
 numericBinop op params = Number $ foldl1 op $ map unpackNum params
 
