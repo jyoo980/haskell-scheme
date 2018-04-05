@@ -6,3 +6,4 @@ and documentation on how to use it will be added later.
 ## Build documentation
 - Run `./clean` to remove any and all files except for Haskell source `.hs`
 - Run `./build` to build the main interpreter
+- Run `./eval` to start the interpreter
