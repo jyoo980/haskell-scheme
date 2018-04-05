@@ -28,20 +28,47 @@ primitives = [("+", numericBinop(+)),
               ("/", numericBinop div),
               ("mod", numericBinop mod),
               ("quotient", numericBinop quot),
-              ("remainder", numericBinop rem)]
+              ("remainder", numericBinop rem),
+              ("string?", unaryOp stringp),
+              ("bool?", unaryOp boolp),
+              ("number?", unaryOp numberp),
+              ("list?", unaryOp listp),
+              ("true?", unaryOp truep),
+              ("false?", unaryOp falsep),
+              ("not", unaryOp notp),
+              ("and", booleanBinop(&&)),
+              ("or", booleanBinop(||)),
+              ("xor", booleanBinop xor)]
 
 numericBinop :: (Integer -> Integer -> Integer) -> [LispVal] -> LispVal
 numericBinop op params = Number $ foldl1 op $ map unpackNum params
+
+booleanBinop :: (Bool -> Bool -> Bool) -> [LispVal] -> LispVal
+booleanBinop op params = Bool $ foldl1 op $ map unpackBool params
               
 unpackNum :: LispVal -> Integer
 unpackNum (Number n) = n
-unpackNum (String n) = let parsed = reads n :: [(Integer, String)] in
-    if null parsed
-        then 0
-        else fst $ head parsed
-unpackNum (List [n]) = unpackNum n
 unpackNum _ = 0
 
+unpackBool :: LispVal -> Bool
+unpackBool (Bool b) = b
+unpackBool _ = False
 
+unaryOp :: (LispVal -> LispVal) -> [LispVal] -> LispVal
+unaryOp f [val] = f val
 
-
+stringp, boolp, numberp, listp :: LispVal -> LispVal 
+stringp (String _)  = Bool True
+stringp _           = Bool False
+boolp (Bool _)      = Bool True
+boolp _             = Bool False
+numberp (Number _)  = Bool True
+numberp _           = Bool False
+listp (List _)      = Bool True
+listp _             = Bool False
+truep (Bool True)   = Bool True
+truep (Bool _)      = Bool False
+falsep (Bool False) = Bool True
+falsep (Bool _)     = Bool False
+notp (Bool True)    = Bool False
+notp (Bool _)       = Bool True
